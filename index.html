@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PocketFlix | Premium Cinema Streaming</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --brand-red: #E50914;
+      --brand-red-glow: rgba(229, 9, 20, 0.5);
+      --bg-black: #080808;
+      --card-black: #121212;
+      --text-white: #ffffff;
+      --text-gray: #a3a3a3;
+      --ease-cinema: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-black);
+      color: var(--text-white);
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+      padding-bottom: 90px;
+    }
+
+    /* --- GLASS NAVIGATION BAR --- */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; width: 100%;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4%;
+      background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(8,8,8,0) 100%);
+      z-index: 1000;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .brand-text {
+      font-family: 'Bebas Neue', Arial, sans-serif;
+      font-size: 38px;
+      font-weight: 900;
+      color: var(--brand-red);
+      letter-spacing: 2px;
+      text-shadow: 0 4px 15px rgba(229, 9, 20, 0.6);
+    }
+
+    .search-box { display: flex; gap: 10px; }
+
+    .search-input {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      padding: 8px 16px 8px 38px;
+      color: #fff;
+      font-size: 13px;
+      outline: none;
+      width: 200px;
+      transition: width 0.4s var(--ease-cinema), border-color 0.4s ease;
+    }
+
+    .search-input:focus {
+      width: 300px;
+      border-color: var(--brand-red);
+      box-shadow: 0 0 15px var(--brand-red-glow);
+    }
+
+    /* --- HERO BILLBOARD --- */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 80vh;
+      min-height: 500px;
+      display: flex;
+      align-items: flex-end;
+      padding: 0 4% 80px 4%;
+      background: linear-gradient(rgba(0,0,0,0.2), #080808), url('https://image.tmdb.org/t/p/original/9faGSxQEA2xFozXSUmkj8sLzEwV.jpg') no-repeat center center/cover;
+    }
+
+    .hero-content { position: relative; z-index: 10; max-width: 680px; }
+    .hero-badge { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: var(--brand-red); text-transform: uppercase; margin-bottom: 12px; }
+    .hero-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(48px, 7vw, 80px); letter-spacing: 1.5px; line-height: 0.95; margin-bottom: 14px; text-shadow: 0 4px 20px rgba(0,0,0,0.9); }
+    .hero-desc { font-size: 14px; color: #e0e0e0; line-height: 1.6; margin-bottom: 24px; text-shadow: 0 2px 8px rgba(0,0,0,0.9); }
+    .hero-actions { display: flex; gap: 14px; }
+
+    .btn-cinema {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 700;
+      cursor: pointer; border: none; outline: none; transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .btn-play-white { background: #ffffff; color: #000; }
+    .btn-play-white:focus, .btn-play-white:hover { background: #dcdcdc; transform: scale(1.05); }
+
+    /* --- CATALOG SHELVES --- */
+    .catalog-wrapper { margin-top: -30px; position: relative; z-index: 20; }
+    .shelf-group { margin-bottom: 36px; }
+    .shelf-header { padding: 0 4%; margin-bottom: 12px; }
+    .shelf-title { font-size: 20px; font-weight: 800; letter-spacing: 0.3px; }
+
+    .carousel-track {
+      display: flex; gap: 16px; overflow-x: auto; padding: 10px 4%; scrollbar-width: none;
+    }
+    .carousel-track::-webkit-scrollbar { display: none; }
+
+    .cinema-card {
+      flex: 0 0 180px; aspect-ratio: 2 / 3; position: relative; border-radius: 10px;
+      overflow: hidden; background-color: var(--card-black); cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6); border: 2px solid transparent;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .cinema-card:focus, .cinema-card:hover {
+      transform: scale(1.08); border-color: #fff; outline: none; z-index: 30;
+    }
+
+    .cinema-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .card-title {
+      position: absolute; bottom: 0; left: 0; right: 0; padding: 12px 8px;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      font-size: 13px; font-weight: 700; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* --- REAL-TIME SERVER LOGS OVERLAY --- */
+    #log-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.94); z-index: 20000; color: #00ff66;
+      font-family: 'Courier New', Courier, monospace; padding: 40px; box-sizing: border-box; flex-direction: column;
+    }
+    #log-header {
+      font-size: 20px; font-weight: bold; margin-bottom: 15px; color: #fff;
+      border-bottom: 1px solid #333; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+    }
+    #log-container {
+      flex: 1; background: #050505; border: 1px solid #222; border-radius: 6px;
+      padding: 20px; overflow-y: auto; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-all;
+    }
+    .close-log-btn {
+      background: var(--brand-red); color: #fff; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; display: none;
+    }
+
+    /* --- CUSTOM LIGHTWEIGHT MINIMALIST PLAYER --- */
+    #player-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 99999;
+    }
+    #tv-video { width: 100%; height: 100%; background: #000; object-fit: contain; }
+    
+    .custom-controls {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+      padding: 20px 30px; display: flex; flex-direction: column; gap: 10px;
+      transition: opacity 0.3s ease; opacity: 1; z-index: 100000;
+    }
+    .progress-bar-container {
+      position: relative; width: 100%; height: 6px; background: rgba(255,255,255,0.3);
+      border-radius: 3px; cursor: pointer;
+    }
+    .progress-bar-filled {
+      position: absolute; top: 0; left: 0; height: 100%; background: var(--brand-red); border-radius: 3px; width: 0%;
+    }
+    .controls-row {
+      display: flex; justify-content: space-between; align-items: center; color: #fff; font-size: 14px; font-weight: 600;
+    }
+    .control-btn {
+      background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; font-weight: bold;
+    }
+    #close-btn {
+      position: absolute; top: 20px; left: 20px; z-index: 100000;
+      background: rgba(18,18,18,0.85); color: #fff; border: 1px solid rgba(255,255,255,0.3);
+      padding: 8px 18px; font-size: 13px; font-weight: bold; cursor: pointer; border-radius: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="navbar">
+    <div style="display: flex; align-items: center; gap: 40px;">
+      <div class="brand-text">POCKETFLIX</div>
+      <ul class="desktop-nav-links" style="display:flex; list-style:none; gap:20px;">
+        <li><a style="color:#fff; text-decoration:none;" href="#">Home</a></li>
+      </ul>
+    </div>
+    <div class="search-box">
+      <input type="text" id="search-input" class="search-input" placeholder="Search titles..." value="Avengers" onkeydown="if(event.key==='Enter') searchMovies()">
+    </div>
+  </header>
+
+  <!-- HERO BILLBOARD -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">✦ TRENDING SPOTLIGHT</div>
+      <h1 class="hero-title">AVENGERS: ENDGAME</h1>
+      <p class="hero-desc">The grave course of events set in motion by Thanos that wiped out half the universe and fractured the Avengers.</p>
+      <div class="hero-actions">
+        <button class="btn-cinema btn-play-white" onclick="fetchStreamUrl(299534, 'movie')">▶ Play Now</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATALOG SHELVES -->
+  <main class="catalog-wrapper">
+    <section class="shelf-group">
+      <div class="shelf-header"><h2 class="shelf-title">🔥 Trending Blockbusters</h2></div>
+      <div class="carousel-track" id="gridRow1"></div>
+    </section>
+
+    <section class="shelf-group">
+      <div class="shelf-header"><h2 class="shelf-title">✨ Popular Movies</h2></div>
+      <div class="carousel-track" id="gridRow2"></div>
+    </section>
+  </main>
+
+  <!-- SERVER LOGS OVERLAY -->
+  <div id="log-overlay">
+    <div id="log-header">
+      <span>🖥️ LIVE SERVER SNIFFER & EXTRACTION LOGS</span>
+      <span id="log-status" style="font-size:14px; color:#aaa;">Testing servers individually...</span>
+      <button class="close-log-btn" id="hide-log-btn" onclick="hideLogOverlay()">Close Logs</button>
+    </div>
+    <div id="log-container">Initializing connection to server event stream...\n</div>
+  </div>
+
+  <!-- MINIMALIST CUSTOM VIDEO PLAYER OVERLAY -->
+  <div id="player-overlay">
+    <button id="close-btn" onclick="closePlayer()">✕ Back</button>
+    <video id="tv-video"></video>
+    
+    <div class="custom-controls" id="customControls">
+      <div class="progress-bar-container" id="progressBar" onclick="seekVideo(event)">
+        <div class="progress-bar-filled" id="progressFilled"></div>
+      </div>
+      <div class="controls-row">
+        <div style="display:flex; align-items:center; gap:15px;">
+          <button class="control-btn" id="playPauseBtn" onclick="togglePlayPause()">❚❚</button>
+          <span id="timeDisplay">0:00 / 0:00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // REPLACE THIS WITH YOUR ACTUAL LIVE RENDER BACKEND URL AFTER DEPLOYMENT
+    var BACKEND_URL = 'https://pocketflix-backend.onrender.com';
+
+    var TMDB_API_KEY = '3fd2be6f0c70a2a598f084ddfb75487c';
+    var eventSource = null;
+    var video = document.getElementById('tv-video');
+    var trueTotalDuration = 0;
+    
+    var currentStreamUrl = '';
+    var currentAudioUrl = '';
+    var currentReferer = '';
+
+    function initLogStream() {
+      if (eventSource) eventSource.close();
+      var logContainer = document.getElementById('log-container');
+      logContainer.innerHTML = 'Connecting to server log stream...\n';
+      document.getElementById('hide-log-btn').style.display = 'none';
+      document.getElementById('log-status').innerText = 'Testing servers individually...';
+
+      eventSource = new EventSource(BACKEND_URL + '/api/logs');
+      eventSource.onmessage = function(event) {
+        logContainer.innerHTML += event.data + '\n';
+        logContainer.scrollTop = logContainer.scrollHeight;
+        
+        if (event.data.includes('EXTRACTION FAILED') || event.data.includes('SUCCESS')) {
+          document.getElementById('log-status').innerText = 'Finished extraction attempt.';
+          document.getElementById('hide-log-btn').style.display = 'inline-block';
+        }
+      };
+    }
+
+    function hideLogOverlay() {
+      document.getElementById('log-overlay').style.display = 'none';
+      if (eventSource) eventSource.close();
+    }
+
+    function loadCatalog() {
+      var url1 = 'https://api.themoviedb.org/3/trending/movie/day?api_key=' + TMDB_API_KEY;
+      var url2 = 'https://api.themoviedb.org/3/movie/popular?api_key=' + TMDB_API_KEY;
+
+      fetchRow(url1, 'gridRow1');
+      fetchRow(url2, 'gridRow2');
+    }
+
+    function searchMovies() {
+      var query = document.getElementById('search-input').value.trim();
+      if (!query) return;
+
+      var url = 'https://api.themoviedb.org/3/search/movie?api_key=' + TMDB_API_KEY + '&query=' + encodeURIComponent(query);
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url, true);
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          var data = JSON.parse(xhr.responseText);
+          var results = data.results || [];
+          if (results.length > 0 && results[0].id) {
+            fetchStreamUrl(results[0].id, 'movie');
+          } else {
+            alert('No movies found for search query.');
+          }
+        }
+      };
+      xhr.send();
+    }
+
+    function fetchRow(apiUrl, containerId) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', apiUrl, true);
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          var data = JSON.parse(xhr.responseText);
+          var container = document.getElementById(containerId);
+          container.innerHTML = '';
+          var results = data.results || [];
+          for (var i = 0; i < results.length; i++) {
+            var movie = results[i];
+            if (!movie.poster_path) continue;
+
+            var card = document.createElement('div');
+            card.className = 'cinema-card';
+            card.tabIndex = 0;
+            card.onclick = (function(id, type) {
+              return function() { fetchStreamUrl(id, type || 'movie'); };
+            })(movie.id, movie.media_type);
+
+            card.innerHTML = '<img src="https://image.tmdb.org/t/p/w500' + movie.poster_path + '" /><div class="card-title">' + (movie.title || movie.name) + '</div>';
+            container.appendChild(card);
+          }
+        }
+      };
+      xhr.send();
+    }
+
+    function fetchStreamUrl(tmdbId, type) {
+      document.getElementById('log-overlay').style.display = 'flex';
+      initLogStream();
+      trueTotalDuration = 0;
+
+      var detailsUrl = 'https://api.themoviedb.org/3/movie/' + tmdbId + '?api_key=' + TMDB_API_KEY;
+      var detailsXhr = new XMLHttpRequest();
+      detailsXhr.open('GET', detailsUrl, true);
+      detailsXhr.onload = function() {
+        if (detailsXhr.status === 200) {
+          var details = JSON.parse(detailsXhr.responseText);
+          if (details.runtime) {
+            trueTotalDuration = details.runtime * 60;
+          }
+        }
+      };
+      detailsXhr.send();
+
+      var endpoint = BACKEND_URL + '/api/get-stream?id=' + tmdbId + '&type=' + (type || 'movie');
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', endpoint, true);
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          var res = JSON.parse(xhr.responseText);
+          if (res.success && res.url) {
+            hideLogOverlay();
+            currentStreamUrl = res.url;
+            currentAudioUrl = res.audioUrl;
+            currentReferer = res.referer;
+            playMovie(res.url, res.audioUrl, res.referer, 0);
+          } else {
+            document.getElementById('log-status').innerText = 'Extraction failed. Click Close Logs to retry.';
+            document.getElementById('hide-log-btn').style.display = 'inline-block';
+          }
+        } else {
+          document.getElementById('log-status').innerText = 'Server error occurred.';
+          document.getElementById('hide-log-btn').style.display = 'inline-block';
+        }
+      };
+      xhr.onerror = function() {
+        document.getElementById('log-status').innerText = 'Network connection error.';
+        document.getElementById('hide-log-btn').style.display = 'inline-block';
+      };
+      xhr.send();
+    }
+
+    function playMovie(streamUrl, audioUrl, referer, startTime) {
+      var overlay = document.getElementById('player-overlay');
+      overlay.style.display = 'block';
+
+      var endpoint = BACKEND_URL + '/stream?url=' + encodeURIComponent(streamUrl);
+      if (audioUrl) endpoint += '&audioUrl=' + encodeURIComponent(audioUrl);
+      if (referer) endpoint += '&referer=' + encodeURIComponent(referer);
+      if (startTime && startTime > 0) endpoint += '&start=' + startTime;
+
+      video.src = endpoint;
+      video.load();
+      video.play();
+    }
+
+    // --- VIDEO PLAYER CONTROLS & SEEKING ---
+    function formatTime(seconds) {
+      if (isNaN(seconds) || seconds <= 0) return "0:00";
+      var h = Math.floor(seconds / 3600);
+      var m = Math.floor((seconds % 3600) / 60);
+      var s = Math.floor(seconds % 60);
+      if (h > 0) {
+        return h + ":" + (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+      }
+      return m + ":" + (s < 10 ? "0" : "") + s;
+    }
+
+    video.addEventListener('timeupdate', function() {
+      var totalDuration = (trueTotalDuration > 0) ? trueTotalDuration : video.duration;
+      if (totalDuration && !isNaN(totalDuration)) {
+        var percent = (video.currentTime / totalDuration) * 100;
+        document.getElementById('progressFilled').style.width = percent + '%';
+        document.getElementById('timeDisplay').innerText = formatTime(video.currentTime) + " / " + formatTime(totalDuration);
+      }
+    });
+
+    function seekVideo(e) {
+      var rect = document.getElementById('progressBar').getBoundingClientRect();
+      var pos = (e.clientX - rect.left) / rect.width;
+      var totalDuration = (trueTotalDuration > 0) ? trueTotalDuration : video.duration;
+      if (totalDuration) {
+        var seekTime = Math.floor(pos * totalDuration);
+        playMovie(currentStreamUrl, currentAudioUrl, currentReferer, seekTime);
+      }
+    }
+
+    function togglePlayPause() {
+      if (video.paused) {
+        video.play();
+        document.getElementById('playPauseBtn').innerText = '❚❚';
+      } else {
+        video.pause();
+        document.getElementById('playPauseBtn').innerText = '▶';
+      }
+    }
+
+    function closePlayer() {
+      var overlay = document.getElementById('player-overlay');
+      video.pause();
+      video.src = '';
+      overlay.style.display = 'none';
+    }
+
+    // --- NUMPAD REMOTE CONTROL NAVIGATION ---
+    document.addEventListener('keydown', function(e) {
+      var focusable = Array.from(document.querySelectorAll('input, button, .cinema-card, [tabindex="0"]'));
+      var current = document.activeElement;
+      var index = focusable.indexOf(current);
+
+      if (e.key === '8' || e.code === 'Numpad8') {
+        if (index > 0) focusable[index - 1].focus();
+        e.preventDefault();
+      } else if (e.key === '2' || e.code === 'Numpad2') {
+        if (index >= 0 && index < focusable.length - 1) focusable[index + 1].focus();
+        else if (focusable.length > 0) focusable[0].focus();
+        e.preventDefault();
+      } else if (e.key === '4' || e.code === 'Numpad4') {
+        if (index > 0) focusable[index - 1].focus();
+        e.preventDefault();
+      } else if (e.key === '6' || e.code === 'Numpad6') {
+        if (index >= 0 && index < focusable.length - 1) focusable[index + 1].focus();
+        else if (focusable.length > 0) focusable[0].focus();
+        e.preventDefault();
+      } else if (e.key === '5' || e.code === 'Numpad5' || e.key === 'Enter') {
+        if (current && typeof current.click === 'function') {
+          current.click();
+        }
+        e.preventDefault();
+      }
+    });
+
+    loadCatalog();
+  </script>
+</body>
+</html>

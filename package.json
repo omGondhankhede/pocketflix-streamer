@@ -7,9 +7,9 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "ffmpeg-static": "^5.2.0",
-    "puppeteer": "^22.0.0",
-    "puppeteer-extra": "^3.5.3",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "ffmpeg-static": "latest",
+    "puppeteer": "latest",
+    "puppeteer-extra": "latest",
+    "puppeteer-extra-plugin-stealth": "latest"
   }
 }

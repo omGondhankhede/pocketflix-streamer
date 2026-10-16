@@ -1,3 +1,15 @@
-"scripts": {
-  "start": "node server.js"
+{
+  "name": "pocketflix-streamer",
+  "version": "1.0.0",
+  "description": "Cinema streaming backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "puppeteer": "^22.0.0",
+    "puppeteer-extra": "^3.5.3",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  }
 }

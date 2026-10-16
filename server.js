@@ -2,7 +2,7 @@ const http = require('http');
 const fs = require('fs');
 const { URL } = require('url');
 const { spawn } = require('child_process');
-const ffmpegPath = require('ffmpeg-static');
+const ffmpegPath = 'ffmpeg';
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 

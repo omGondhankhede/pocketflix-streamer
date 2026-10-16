@@ -8,7 +8,7 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
 puppeteer.use(StealthPlugin());
 
-const PORT = 80;
+const PORT = process.env.PORT || 80;
 let activeFfmpeg = null;
 const XOR_KEY = 'nexus-super-secret-';
 
@@ -354,5 +354,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Fully Logged Server running on port 80`);
+  console.log(`🚀 Fully Logged Server running on port ${PORT}`);
 });

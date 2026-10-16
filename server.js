@@ -8,7 +8,7 @@ const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
 puppeteer.use(StealthPlugin());
 
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 8080;
 let activeFfmpeg = null;
 const XOR_KEY = 'nexus-super-secret-';
 
